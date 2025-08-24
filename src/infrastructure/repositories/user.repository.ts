@@ -27,4 +27,16 @@ export class UserRepository {
   async delete(id: number): Promise<void> {
     await apiClient.get(`${this.baseUrl}/delete/${id}`);
   }
+
+  async desactivate(id: number): Promise<void> {
+    await apiClient.get(`${this.baseUrl}/desactiveUser/${id}`);
+  }
+
+  async activate(id: number): Promise<void> {
+    await apiClient.get(`${this.baseUrl}/activeUser/${id}`);
+  }
+
+  async refrechPassword(id :number): Promise<void> {
+    await apiClient.get(`${this.baseUrl}/refrechPassword/${id}`);
+  }
 }

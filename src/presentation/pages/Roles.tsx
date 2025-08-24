@@ -78,7 +78,7 @@ export const Roles: React.FC = () => {
       label: 'Statut',
       render: (value: string) => (
         <span className={`px-2 py-1 text-xs rounded-full ${
-          value === 'Actif' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+          value === 'actif' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
         }`}>
           {value == 'actif' ? 'Actif' : 'Inactif'}
         </span>
