@@ -4,7 +4,8 @@ export interface User {
   email: string;
   nom: string;
   prenom: string;
-  role: string;
+  idRole: number;
+  libelleRole: string;
   dateCreation: string | null;
   dateDesactivation : string | null ;
   dateModification : string | null ;
@@ -16,7 +17,7 @@ export interface CreateUserRequest {
   email: string;
   nom: string;
   prenom: string;
-  roleId: number;
+  idRole: number;
 }
 
 export interface UpdateUserRequest {
@@ -25,6 +26,6 @@ export interface UpdateUserRequest {
   email: string;
   nom: string;
   prenom: string;
-  roleId: number;
+  idRole: number;
   statut: 'Actif' | 'Inactif';
 }

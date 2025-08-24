@@ -27,4 +27,16 @@ export class UserService {
   async deleteUser(id: number): Promise<void> {
     await this.userRepository.delete(id);
   }
+
+  async desactivateUser(id: number): Promise<void> {
+    await this.userRepository.desactivate(id);
+  }
+
+  async activateUser(id: number): Promise<void> {
+    await this.userRepository.activate(id);
+  }
+
+  async refrechPassword(id : number): Promise<void> {
+    await this.userRepository.refrechPassword(id);
+  }
 }

@@ -28,7 +28,7 @@ export const Users: React.FC = () => {
     email: '',
     nom: '',
     prenom: '',
-    roleId: '',
+    roleId: 0,
     statut: 'Actif' as 'Actif' | 'Inactif'
   });
 
@@ -64,7 +64,7 @@ export const Users: React.FC = () => {
 
   // Get unique roles for filter
   const uniqueRoles = useMemo(() => {
-    const roleNames = [...new Set(users.map(u => u.role))];
+    const roleNames = [...new Set(users.map(u => u.libelleRole))];
     return roleNames.filter(Boolean).sort();
   }, [users]);
 
@@ -77,8 +77,8 @@ export const Users: React.FC = () => {
                            user.prenom.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            user.email.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus = statusFilter === 'all' || user.statut.toLowerCase() === statusFilter;
-      const matchesRole = roleFilter === 'all' || user.role === roleFilter;
-      return matchesSearch && matchesStatus && matchesRole;
+      //const matchesRole = roleFilter === 'all' || user.role === roleFilter;
+      return matchesSearch && matchesStatus;// && matchesRole;
     });
   }, [users, searchTerm, statusFilter, roleFilter]);
 
@@ -88,16 +88,64 @@ export const Users: React.FC = () => {
     { key: 'nom', label: 'Nom' },
     { key: 'prenom', label: 'Prénom' },
     { key: 'email', label: 'Email' },
-    { key: 'role', label: 'Rôle' },
+    { key: 'libelleRole', label: 'Rôle' },
     { 
       key: 'statut', 
       label: 'Statut',
       render: (value: string) => (
         <span className={`px-2 py-1 text-xs rounded-full ${
-          value === 'Actif' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+          value === 'actif' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
         }`}>
-          {value}
+          {value == 'actif' ? 'Actif' : 'Inactif'}
         </span>
+      )
+    },
+    { 
+      key: 'password', 
+      label: 'R.mot de passe',
+      render: (_: any, user: User) => (
+        <div className="flex items-center justify-center">
+          <button
+            onClick={() => handleRefreshPassword(user)}
+            className="inline-flex items-center px-2 py-2 border border-blue-300 text-xs font-medium rounded-md text-blue-700 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+            title="Générer un nouveau mot de passe"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </button>
+        </div>
+      )
+    },
+    { 
+      key: 'ChangeStatus', 
+      label: 'Changement statut',
+      render: (_: any, user: User) => (
+        <div className="flex items-center gap-2">
+          {user.statut.toLowerCase() === 'actif' ? (
+            <button
+              onClick={() => handleDeactivateUser(user)}
+              className="inline-flex items-center px-3 py-1.5 border border-red-300 text-xs font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
+              title="Désactiver l'utilisateur"
+            >
+              <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636" />
+              </svg>
+              Dés.
+            </button>
+          ) : (
+            <button
+              onClick={() => handleActivateUser(user)}
+              className="inline-flex items-center px-3 py-1.5 border border-green-300 text-xs font-medium rounded-md text-green-700 bg-white hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
+              title="Activer l'utilisateur"
+            >
+              <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Act.
+            </button>
+          )}
+        </div>
       )
     },
     { key: 'dateCreation', label: 'Date de création' }
@@ -115,25 +163,52 @@ export const Users: React.FC = () => {
       email: '',
       nom: '',
       prenom: '',
-      roleId: '',
+      roleId: 0,
       statut: 'Actif'
     });
     setError('');
     setIsModalOpen(true);
   };
 
-  const handleEdit = (user: User) => {
-    setEditingUser(user);
-    setFormData({
-      username: user.username,
-      email: user.email,
-      nom: user.nom,
-      prenom: user.prenom,
-      roleId: roles.find(r => r.nom === user.role)?.id.toString() || '',
-      statut: user.statut
-    });
-    setError('');
-    setIsModalOpen(true);
+  const handleRefreshPassword = async (user: User) => {
+    try {
+      setTableLoading(true);
+      await userService.refrechPassword(user.id);
+      setError('');
+      // You might want to show a success message here
+      console.log(`Password refreshed for user: ${user.username}`);
+    } catch (error) {
+      setError('Erreur lors de la génération du nouveau mot de passe');
+      console.error('Error refreshing password:', error);
+    } finally {
+      setTableLoading(false);
+    }
+  };
+
+  const handleActivateUser = async (user: User) => {
+    try {
+      setTableLoading(true);
+      await userService.activateUser(user.id);
+      await loadUsers();
+    } catch (error) {
+      setError('Erreur lors de l\'activation de l\'utilisateur');
+      console.error('Error activating user:', error);
+    } finally {
+      setTableLoading(false);
+    }
+  };
+
+  const handleDeactivateUser = async (user: User) => {
+    try {
+      setTableLoading(true);
+      await userService.desactivateUser(user.id);
+      await loadUsers();
+    } catch (error) {
+      setError('Erreur lors de la désactivation de l\'utilisateur');
+      console.error('Error deactivating user:', error);
+    } finally {
+      setTableLoading(false);
+    }
   };
 
   const handleDelete = (user: User) => {
@@ -176,7 +251,7 @@ export const Users: React.FC = () => {
           email: formData.email,
           nom: formData.nom,
           prenom: formData.prenom,
-          roleId: parseInt(formData.roleId),
+          idRole: formData.roleId,
           statut: formData.statut
         };
         await userService.updateUser(editingUser.id, updateData);
@@ -186,7 +261,7 @@ export const Users: React.FC = () => {
           email: formData.email,
           nom: formData.nom,
           prenom: formData.prenom,
-          roleId: parseInt(formData.roleId)
+          idRole: formData.roleId
         };
         await userService.createUser(createData);
       }
@@ -294,7 +369,7 @@ export const Users: React.FC = () => {
             </div>
 
             {/* Role Filter */}
-            <div className="sm:w-48">
+            {/* <div className="sm:w-48">
               <select
                 value={roleFilter}
                 onChange={handleRoleFilterChange}
@@ -309,7 +384,7 @@ export const Users: React.FC = () => {
                   <option key={role} value={role}>{role}</option>
                 ))}
               </select>
-            </div>
+            </div> */}
 
             {/* Clear Filters Button */}
             {(searchTerm || statusFilter !== 'all' || roleFilter !== 'all') && (
@@ -364,7 +439,6 @@ export const Users: React.FC = () => {
         <Table
           columns={columns}
           data={filteredUsers}
-          onEdit={handleEdit}
           onDelete={handleDelete}
           loading={tableLoading}
         />
@@ -444,6 +518,8 @@ export const Users: React.FC = () => {
               value={formData.username}
               onChange={handleChange}
               required
+              readOnly={!!editingUser}
+              disabled={!!editingUser}
             />
             <Input
               label="Email"
@@ -459,6 +535,8 @@ export const Users: React.FC = () => {
               value={formData.nom}
               onChange={handleChange}
               required
+              readOnly={!!editingUser}
+              disabled={!!editingUser}
             />
             <Input
               label="Prénom"
@@ -466,6 +544,8 @@ export const Users: React.FC = () => {
               value={formData.prenom}
               onChange={handleChange}
               required
+              readOnly={!!editingUser}
+              disabled={!!editingUser}
             />
         
             <Select
