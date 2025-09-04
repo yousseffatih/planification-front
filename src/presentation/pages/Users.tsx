@@ -556,7 +556,7 @@ export const Users: React.FC = () => {
               options={roleOptions}
               required
             />
-            <Select
+            {/* <Select
               label="Statut"
               name="statut"
               value={formData.statut}
@@ -566,7 +566,7 @@ export const Users: React.FC = () => {
                 { value: 'inActif', label: 'Inactif' }
               ]}
               required
-            />
+            /> */}
           </div>
 
           {error && (

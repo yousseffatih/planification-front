@@ -13,6 +13,7 @@ export interface LoginResponse {
   idUser: number;
   first: string;
   roles: string[];
+  role: string;
 }
 
 export interface ChangePasswordRequest {
@@ -29,6 +30,7 @@ export interface User {
   idUser: number;
   first: string;
   roles: string[];
+  role: string;
 }
 
 export interface AuthState {

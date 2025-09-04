@@ -12,6 +12,7 @@ import { Modules } from './presentation/pages/Modules';
 import { Salles } from './presentation/pages/Salles';
 import { ProtectedRoute } from './presentation/components/common/ProtectedRoute';
 import { DashboardLayout } from './presentation/components/layout/DashboardLayout';
+import { Planifications } from './presentation/pages/Planification';
 
 function App() {
   return (
@@ -31,6 +32,16 @@ function App() {
                 <ProtectedRoute>
                   <DashboardLayout>
                     <Dashboard />
+                  </DashboardLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/planification"
+              element={
+                <ProtectedRoute>
+                  <DashboardLayout>
+                    <Planifications />
                   </DashboardLayout>
                 </ProtectedRoute>
               }

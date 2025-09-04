@@ -1,5 +1,5 @@
 import { SalleRepository } from '../../infrastructure/repositories/salle.repository';
-import { Salle, CreateSalleRequest, UpdateSalleRequest } from '../../shared/types/salle.types';
+import { Salle, CreateSalleRequest, UpdateSalleRequest, ListAttribute } from '../../shared/types/salle.types';
 
 export class SalleService {
   private salleRepository: SalleRepository;
@@ -26,5 +26,13 @@ export class SalleService {
 
   async deleteSalle(id: number): Promise<void> {
     await this.salleRepository.delete(id);
+  }
+
+  async getListeTypeSalles(): Promise<ListAttribute[]> {
+    return await this.salleRepository.getListeTypeSalles();
+  }
+
+  async getListSalles(): Promise<ListAttribute[]> {
+    return await this.salleRepository.getListSalles();
   }
 }

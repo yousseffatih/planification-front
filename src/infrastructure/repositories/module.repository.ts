@@ -1,5 +1,6 @@
 import { apiClient } from '../api/api.client';
 import { Module, CreateModuleRequest, UpdateModuleRequest } from '../../shared/types/module.types';
+import { ListAttribute } from '../../shared/types/salle.types';
 
 export class ModuleRepository {
   private baseUrl = '/modules';
@@ -26,5 +27,10 @@ export class ModuleRepository {
 
   async delete(id: number): Promise<void> {
     await apiClient.get(`${this.baseUrl}/delete/${id}`);
+  }
+
+  async getListModules(): Promise<ListAttribute[]> {
+    const response = await apiClient.get<ListAttribute[]>(`${this.baseUrl}/listModules`);
+    return response.data;
   }
 }

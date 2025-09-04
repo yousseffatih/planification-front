@@ -20,6 +20,7 @@ export const Professors: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'actif' | 'inactif'>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
+  const [typeProfOptions, setTypeProfOptions] = useState<{ value: number; label: string }[]>([]);
   const [formData, setFormData] = useState({
     nom: '',
     prenom: '',
@@ -33,6 +34,7 @@ export const Professors: React.FC = () => {
 
   useEffect(() => {
     loadProfessors();
+    loadTypeProfessors();
   }, []);
 
   const loadProfessors = async () => {
@@ -47,6 +49,20 @@ export const Professors: React.FC = () => {
       setTableLoading(false);
     }
   };
+
+  const loadTypeProfessors = async () => {
+  try {
+    const types = await professorService.getListTypeProf();
+    setTypeProfOptions(
+      types.map((t: any) => ({
+        value: t.id,
+        label: t.libelle
+      }))
+    );
+  } catch (error) {
+    console.error("Erreur lors du chargement des types de professeurs:", error);
+  }
+};
 
   // Get unique professor types for filter
   const uniqueTypes = useMemo(() => {
@@ -63,7 +79,7 @@ export const Professors: React.FC = () => {
                            professor.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            professor.numeroTele.includes(searchTerm);
       const matchesStatus = statusFilter === 'all' || professor.statut.toLowerCase() === statusFilter;
-      const matchesType = typeFilter === 'all' || professor.libelleTypeProf === typeFilter;
+      const matchesType = typeFilter === 'all' || professor.idTypeProf.toString() === typeFilter;
       return matchesSearch && matchesStatus && matchesType;
     });
   }, [professors, searchTerm, statusFilter, typeFilter]);
@@ -92,14 +108,6 @@ export const Professors: React.FC = () => {
     { key: 'dateCreation', label: 'Date de création' }
   ];
 
-  const typeProfOptions = [
-    { value: 1, label: 'Professeur Titulaire' },
-    { value: 2, label: 'Maître de Conférences' },
-    { value: 3, label: 'Professeur Associé' },
-    { value: 4, label: 'Chargé de Cours' },
-    { value: 5, label: 'Assistant' },
-    { value: 6, label: 'Professeur Invité' }
-  ];
 
   const handleAdd = () => {
     setEditingProfessor(null);
@@ -292,17 +300,17 @@ export const Professors: React.FC = () => {
                 value={typeFilter}
                 onChange={handleTypeFilterChange}
                 className="block w-full py-3 px-4 border border-gray-300 rounded-lg
-                         focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                         text-gray-900 text-sm bg-white
-                         transition-all duration-200 ease-in-out
-                         hover:border-gray-400 focus:shadow-lg"
+                          focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                          text-gray-900 text-sm bg-white
+                          transition-all duration-200 ease-in-out
+                          hover:border-gray-400 focus:shadow-lg"
               >
                 <option value="all">Tous les types</option>
-                {uniqueTypes
-                  .filter((type): type is string => type !== null)
-                  .map(type => (
-                    <option key={type} value={type}>{type}</option>
-                  ))}
+                {typeProfOptions.map(type => (
+                  <option key={type.value} value={type.value}>
+                    {type.label}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -472,14 +480,15 @@ export const Professors: React.FC = () => {
               onChange={handleChange}
               required
             />
-            <Select
-              label="Type de professeur"
-              name="idTypeProf"
-              value={formData.idTypeProf}
-              onChange={handleChange}
-              options={typeProfOptions}
-              required
-            />
+           <Select
+            label="Type de professeur"
+            name="idTypeProf"
+            value={formData.idTypeProf}
+            onChange={handleChange}
+            options={typeProfOptions}
+            required
+          />
+
             <Select
               label="Statut"
               name="statut"

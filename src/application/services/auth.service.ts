@@ -1,5 +1,5 @@
 import { AuthRepository } from '../../infrastructure/repositories/auth.repository';
-import { LoginRequest, LoginResponse, ChangePasswordRequest, User } from '../../shared/types/auth.types';
+import { LoginRequest, ChangePasswordRequest, User } from '../../shared/types/auth.types';
 
 export class AuthService {
   private authRepository: AuthRepository;
@@ -19,6 +19,7 @@ export class AuthService {
       idUser: response.idUser,
       first: response.first,
       roles: response.roles,
+      role: response.role,
     };
 
     // Save to localStorage
