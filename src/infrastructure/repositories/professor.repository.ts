@@ -1,5 +1,6 @@
 import { apiClient } from '../api/api.client';
 import { Professor, CreateProfessorRequest, UpdateProfessorRequest } from '../../shared/types/professor.types';
+import { ListAttribute } from '../../shared/types/salle.types';
 
 export class ProfessorRepository {
   private baseUrl = '/professeurs';
@@ -27,4 +28,14 @@ export class ProfessorRepository {
   async delete(id: number): Promise<void> {
     await apiClient.get(`${this.baseUrl}/delete/${id}`);
   }
+
+  async getListTypeProf(): Promise<ListAttribute[]> {
+    const response = await apiClient.get<ListAttribute[]>(`/attributs/listTypeProfesseurs`);
+    return response.data;
+  }
+
+  async getListProfessor(): Promise<ListAttribute[]> {
+      const response = await apiClient.get<ListAttribute[]>(`${this.baseUrl}/listProfesseurs`);
+      return response.data;
+    }
 }

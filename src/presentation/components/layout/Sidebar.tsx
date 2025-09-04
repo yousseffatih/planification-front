@@ -8,6 +8,7 @@ import {
   UserGroupIcon,
   BookOpenIcon,
   BuildingOfficeIcon,
+  CalendarIcon,
   ArrowRightOnRectangleIcon
 } from '@heroicons/react/24/outline';
 
@@ -17,7 +18,8 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
   const navItems = [
-    { name: 'Home', href: '/dashboard', icon: HomeIcon },
+    { name: 'Tableau de bord', href: '/dashboard', icon: HomeIcon },
+    { name: 'Planification', href: '/planification', icon: CalendarIcon },
     { name: 'Utilisateurs', href: '/users', icon: UsersIcon },
     { name: 'Classes', href: '/classes', icon: AcademicCapIcon },
     { name: 'Rôles', href: '/roles', icon: ShieldCheckIcon },

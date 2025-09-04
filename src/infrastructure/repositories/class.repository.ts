@@ -1,5 +1,6 @@
 import { apiClient } from '../api/api.client';
 import { Class, CreateClassRequest, UpdateClassRequest } from '../../shared/types/class.types';
+import { ListAttribute } from '../../shared/types/salle.types';
 
 export class ClassRepository {
   private baseUrl = '/classes';
@@ -27,4 +28,9 @@ export class ClassRepository {
   async delete(id: number): Promise<void> {
     await apiClient.get(`${this.baseUrl}/delete/${id}`);
   }
+
+  async getListClass(): Promise<ListAttribute[]> {
+      const response = await apiClient.get<ListAttribute[]>(`${this.baseUrl}/listClasses`);
+      return response.data;
+    }
 }

@@ -23,3 +23,9 @@ export interface UpdateSalleRequest {
   idTypeSalle: number;
   statut: 'Actif' | 'Inactif';
 }
+
+export interface ListAttribute {
+  id: number;
+  libelle: string;
+  value: string;
+}

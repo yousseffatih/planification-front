@@ -1,5 +1,5 @@
 import { apiClient } from '../api/api.client';
-import { Salle, CreateSalleRequest, UpdateSalleRequest } from '../../shared/types/salle.types';
+import { Salle, CreateSalleRequest, UpdateSalleRequest, ListAttribute } from '../../shared/types/salle.types';
 
 export class SalleRepository {
   private baseUrl = '/salles';
@@ -27,4 +27,14 @@ export class SalleRepository {
   async delete(id: number): Promise<void> {
     await apiClient.get(`${this.baseUrl}/delete/${id}`);
   }
+
+  async getListeTypeSalles(): Promise<ListAttribute[]> {
+    const response = await apiClient.get<ListAttribute[]>(`/attributs/listTypeSalles`);
+    return response.data;
+  }
+
+  async getListSalles(): Promise<ListAttribute[]> {
+      const response = await apiClient.get<ListAttribute[]>(`${this.baseUrl}/listSalles`);
+      return response.data;
+    }
 }

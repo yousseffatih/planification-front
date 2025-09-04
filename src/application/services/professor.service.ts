@@ -1,5 +1,6 @@
 import { ProfessorRepository } from "../../infrastructure/repositories/professor.repository";
 import { CreateProfessorRequest, Professor, UpdateProfessorRequest } from "../../shared/types/professor.types";
+import { ListAttribute } from "../../shared/types/salle.types";
 
 
 export class ProfessorService {
@@ -66,14 +67,23 @@ export class ProfessorService {
     }
   }
 
-  // async getProfessorsByType(typeProfId: number): Promise<Professor[]> {
-  //   try {
-  //     return await this.professorRepository.getByType(typeProfId);
-  //   } catch (error) {
-  //     console.error('Error in ProfessorService.getProfessorsByType:', error);
-  //     throw new Error('Erreur lors du chargement des professeurs par type');
-  //   }
-  // }
+  async getListTypeProf(): Promise<ListAttribute[]> {
+    try {
+      return await this.professorRepository.getListTypeProf();
+    } catch (error) {
+      console.error('Error in ProfessorService.getProfessorsByType:', error);
+      throw new Error('Erreur lors du chargement des professeurs par type');
+    }
+  }
+
+  async getListProfessor(): Promise<ListAttribute[]> {
+    try {
+      return await this.professorRepository.getListProfessor();
+    } catch (error) {
+      console.error('Error in ProfessorService.getListProfessor:', error);
+      throw new Error('Erreur lors du chargement de la liste des professeurs');
+    }
+  }
 
   // async getActiveProfessors(): Promise<Professor[]> {
   //   try {

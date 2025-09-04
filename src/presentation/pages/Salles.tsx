@@ -52,37 +52,18 @@ export const Salles: React.FC = () => {
   };
 
   const loadTypeSalles = async () => {
-    try {
-      // Assuming you have a method to get types de salles
-      // If not, you can keep the static data or create a separate API call
-      // const types = await sallesServices.getTypeSalles();
-      // const options = types.map((type: ListAttribut) => ({
-      //   value: type.id,
-      //   label: type.nom
-      // }));
-      // setTypeSalleOptions(options);
-      setTypeSalleOptions([
-        { value: 1, label: 'Amphithéâtre' },
-        { value: 2, label: 'Laboratoire Informatique' },
-        { value: 3, label: 'Salle de Cours' },
-        { value: 4, label: 'Laboratoire Sciences' },
-        { value: 5, label: 'Salle de Conférence' },
-        { value: 6, label: 'Bibliothèque' }
-      ]);
-      
-    } catch (err) {
-      // Fallback to static data if API call fails
-      setTypeSalleOptions([
-        { value: 1, label: 'Amphithéâtre' },
-        { value: 2, label: 'Laboratoire Informatique' },
-        { value: 3, label: 'Salle de Cours' },
-        { value: 4, label: 'Laboratoire Sciences' },
-        { value: 5, label: 'Salle de Conférence' },
-        { value: 6, label: 'Bibliothèque' }
-      ]);
-      console.warn('Using fallback type salle options:', err);
-    }
-  };
+  try {
+    const types = await sallesServices.getListeTypeSalles();
+    const options = types.map(type => ({
+      value: type.id,
+      label: type.libelle
+    }));
+    setTypeSalleOptions(options);
+  } catch (err) {
+    setError('Erreur lors du chargement des types de salle');
+    console.error('Error loading type salles:', err);
+  }
+};
 
   // Get unique types for filter
   const uniqueTypes = useMemo(() => {
@@ -99,7 +80,7 @@ export const Salles: React.FC = () => {
                            salle.maxEffective.toString().includes(searchTerm);
       
       const matchesStatus = statusFilter === 'all' || salle.statut.toLowerCase() === statusFilter;
-      const matchesType = typeFilter === 'all' || salle.libelleTypeSalle === typeFilter;
+      const matchesType = typeFilter === 'all' || salle.idTypeSalle.toString() === typeFilter;
       
       let matchesCapacity = true;
       if (capacityFilter !== 'all') {
@@ -347,23 +328,24 @@ export const Salles: React.FC = () => {
 
             {/* Type Filter */}
             <div className="sm:w-56">
-              <select
-                value={typeFilter}
-                onChange={handleTypeFilterChange}
-                className="block w-full py-3 px-4 border border-gray-300 rounded-lg
-                         focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                         text-gray-900 text-sm bg-white
-                         transition-all duration-200 ease-in-out
-                         hover:border-gray-400 focus:shadow-lg"
-              >
-                <option value="all">Tous les types</option>
-                {uniqueTypes
-                  .filter((type): type is string => type !== null)
-                  .map(type => (
-                    <option key={type} value={type}>{type}</option>
+                <select
+                  value={typeFilter}
+                  onChange={handleTypeFilterChange}
+                  className="block w-full py-3 px-4 border border-gray-300 rounded-lg
+                          focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                          text-gray-900 text-sm bg-white
+                          transition-all duration-200 ease-in-out
+                          hover:border-gray-400 focus:shadow-lg"
+                >
+                  <option value="all">Tous les types</option>
+                  {typeSalleOptions.map(type => (
+                    <option key={type.value} value={type.value}>
+                      {type.label}
+                    </option>
                   ))}
-              </select>
-            </div>
+                </select>
+              </div>
+
 
             {/* Capacity Filter */}
             <div className="sm:w-48">
@@ -567,6 +549,7 @@ export const Salles: React.FC = () => {
               required
               disabled={loading}
             />
+
 
             <Select
               label="Statut"

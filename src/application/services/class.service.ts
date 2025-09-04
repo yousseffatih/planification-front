@@ -1,5 +1,6 @@
 import { ClassRepository } from "../../infrastructure/repositories/class.repository";
 import { Class, CreateClassRequest, UpdateClassRequest } from "../../shared/types/class.types";
+import { ListAttribute } from "../../shared/types/salle.types";
 
 export class ClassService {
   private classRepository: ClassRepository;
@@ -64,6 +65,10 @@ export class ClassService {
       throw new Error('Erreur lors de la suppression de la classe');
     }
   }
+
+  async getListClass(): Promise<ListAttribute[]> {
+    return await this.classRepository.getListClass();
+  } 
 
   private validateClassData(classData: CreateClassRequest | UpdateClassRequest): void {
     if (!classData.nom || classData.nom.trim().length === 0) {

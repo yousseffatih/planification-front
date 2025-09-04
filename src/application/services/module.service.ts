@@ -1,5 +1,6 @@
 import { ModuleRepository } from '../../infrastructure/repositories/module.repository';
 import { Module, CreateModuleRequest, UpdateModuleRequest } from '../../shared/types/module.types';
+import { ListAttribute } from '../../shared/types/salle.types';
 
 export class ModuleService {
   private moduleRepository: ModuleRepository;
@@ -26,5 +27,9 @@ export class ModuleService {
 
   async deleteModule(id: number): Promise<void> {
     await this.moduleRepository.delete(id);
+  }
+
+  async getListModules(): Promise<ListAttribute[]> {
+    return await this.moduleRepository.getListModules();
   }
 }
