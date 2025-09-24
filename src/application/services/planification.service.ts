@@ -1,5 +1,5 @@
 import { PlanificationReppsitory } from "../../infrastructure/repositories/planification.repository";
-import { CreatePlanificationRequest, FilterRequest, Planification, PlanificationResponse  } from "../../shared/types/planification.types";
+import { CreatePlanificationRequest, FilterRequest, Planification, PlanificationResponse, TotalPagesInfo  } from "../../shared/types/planification.types";
 import { ListAttribute } from "../../shared/types/salle.types";
 
 export class PlanificationService {
@@ -28,8 +28,25 @@ export class PlanificationService {
    const response = await this.planificationRepository.deletePlanification(id);
     return response;
   }
-    async getTypePlanifications(): Promise<ListAttribute[]> {  
-       const response = await this.planificationRepository.getTypePlanifications();
-       return response;
-    }
+
+  async getTypePlanifications(): Promise<ListAttribute[]> {  
+      const response = await this.planificationRepository.getTypePlanifications();
+      return response;
+  }
+
+  async getTotalPagesInfo(): Promise<TotalPagesInfo> {
+      const response = await this.planificationRepository.getTotalPagesInfo();
+      return response;
+  }
+
+  async getListPlanifications(dateDebut : string ,dateFin : string): Promise<Planification[]> {
+      const response = await this.planificationRepository.getListPlanifications(dateDebut,dateFin);
+      return response;
+  }
+
+  async getPlanificationById(id: number): Promise<Planification> {
+      const response = await this.planificationRepository.getPlanificationById(id);
+      return response;
+  }
+  
 }

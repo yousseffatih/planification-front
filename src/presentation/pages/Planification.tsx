@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo } from 'react';
 import { useAppDispatch, useAppSelector } from '../../application/hooks/redux.hooks';
-import { CreatePlanificationRequest, FilterRequest } from "../../shared/types/planification.types";
+import { CreatePlanificationRequest, FilterRequest, Planification } from "../../shared/types/planification.types";
 import { PlusIcon } from 'lucide-react';
 import { Table } from '../components/common/Table';
 import { Button } from '../components/common/Button';
@@ -10,6 +10,7 @@ import { Select } from '../components/common/Select';
 import XMarkIcon from '@heroicons/react/24/solid/esm/XMarkIcon';
 import {
   fetchPlanifications,
+  fetchPlanificationById, // Add this import
   fetchDropdownOptions,
   createPlanification,
   updatePlanification,
@@ -33,6 +34,7 @@ export const Planifications: React.FC = () => {
   const dispatch = useAppDispatch();
   
   // Redux state selectors
+  const { user } = useAppSelector((state) => state.auth);
   const {
     planifications,
     loading,
@@ -52,8 +54,7 @@ export const Planifications: React.FC = () => {
     modules,
     professeurs,
     typePlanifications,
-    classes,
-    dropdownsLoading
+    classes
   } = useAppSelector((state) => state.planifications);
 
   // Load data on component mount and when pagination changes
@@ -95,15 +96,56 @@ export const Planifications: React.FC = () => {
   ];
 
   const handleAdd = () => {
+    // Initialize form with proper default values
+    dispatch(setFormData({
+      nom: '',
+      datePlanification: '',
+      timeDebut: '',
+      timeFin: '',
+      idSalle: 0,
+      idModule: 0,
+      idProfesseur: 0,
+      idTypePlanification: 0,
+      description: '',
+      idUser: 0,
+      idsClasses: []
+    }));
+    dispatch(setEditingPlanification(null));
     dispatch(openModal());
   };
 
-  const handleEdit = (planification: any) => {
-    dispatch(setEditingPlanification(planification));
-    dispatch(openModal());
+  const handleEdit = async (planification: Planification) => {
+    try {
+      // First fetch the detailed planification data
+      const detailedPlanification = await dispatch(fetchPlanificationById(planification.id)).unwrap();
+      
+      // Set the editing planification
+      dispatch(setEditingPlanification(detailedPlanification));
+      
+      // Populate the form with the fetched data
+      dispatch(setFormData({
+        nom: detailedPlanification.nom || '',
+        datePlanification: detailedPlanification.datePlanification || '',
+        timeDebut: detailedPlanification.timeDebut ? detailedPlanification.timeDebut.split(' ')[1] || detailedPlanification.timeDebut : '',
+        timeFin: detailedPlanification.timeFin ? detailedPlanification.timeFin.split(' ')[1] || detailedPlanification.timeFin : '',
+        idSalle: detailedPlanification.idSalle ,
+        idModule: detailedPlanification.idModule,
+        idProfesseur: detailedPlanification.idProfesseur,
+        idTypePlanification: detailedPlanification.idTypePlanification,
+        description: detailedPlanification.description || '',
+        idUser: detailedPlanification.idUser,
+        idsClasses: detailedPlanification.idsClasses || []
+      }));
+      
+      // Open the modal
+      dispatch(openModal());
+    } catch (error) {
+      console.error('Error fetching planification details:', error);
+      // Optionally show an error message to the user
+    }
   };
 
-  const handleDelete = (planification: any) => {
+  const handleDelete = (planification: Planification) => {
     dispatch(openDeleteModal(planification));
   };
 
@@ -113,7 +155,7 @@ export const Planifications: React.FC = () => {
     try {
       await dispatch(deletePlanification(planificationToDelete.id)).unwrap();
       await dispatch(fetchPlanifications({ filters, page: currentPage, size: pageSize }));
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Error will be handled by Redux slice and shown in the UI
       console.error('Error deleting planification:', error);
     }
@@ -131,9 +173,24 @@ export const Planifications: React.FC = () => {
 
     try {
       if (editingPlanification) {
+        // For update, prepare the data with proper format
+        const updateData = {
+          nom: formData.nom,
+          datePlanification: formData.datePlanification,
+          timeDebut: formData.timeDebut.includes(' ') ? formData.timeDebut : `${formData.datePlanification} ${formData.timeDebut}`,
+          timeFin: formData.timeFin.includes(' ') ? formData.timeFin : `${formData.datePlanification} ${formData.timeFin}`,
+          idModule: formData.idModule,
+          idSalle: formData.idSalle,
+          idUser: formData.idUser,
+          idsClasses: formData.idsClasses,
+          description: formData.description,
+          idTypePlanification: formData.idTypePlanification,
+          idProfesseur: formData.idProfesseur
+        };
+        
         await dispatch(updatePlanification({ 
           id: editingPlanification.id, 
-          data: formData 
+          data: updateData 
         })).unwrap();
       } else {
         // Format times to include date as per API requirement
@@ -147,8 +204,8 @@ export const Planifications: React.FC = () => {
           timeFin: formatDateTime(formData.datePlanification, formData.timeFin),
           idModule: formData.idModule,
           idSalle: formData.idSalle,
-          idUser: formData.idUser,
-          idsClasses: formData.idsClasses,
+          idUser: user?.idUser || 0, // Use current user's ID
+          idsClasses: formData.idsClasses ?? [],
           nom: formData.nom,
           description: formData.description,
           idTypePlanification: formData.idTypePlanification,
@@ -158,7 +215,7 @@ export const Planifications: React.FC = () => {
       }
       
       await dispatch(fetchPlanifications({ filters, page: currentPage, size: pageSize }));
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error submitting planification:', error);
     }
   };
@@ -184,7 +241,7 @@ export const Planifications: React.FC = () => {
     return classes.filter(classe => !formData.idsClasses.includes(classe.id));
   };
 
-  const handleFilterChange = (name: keyof FilterRequest, value: any) => {
+  const handleFilterChange = (name: keyof FilterRequest, value: string | number | null) => {
     dispatch(setFilter({ key: name, value }));
   };
 
@@ -193,6 +250,21 @@ export const Planifications: React.FC = () => {
   };
 
   const handleCloseModal = () => {
+    // Clear form data when closing modal
+    dispatch(setFormData({
+      nom: '',
+      datePlanification: '',
+      timeDebut: '',
+      timeFin: '',
+      idSalle: 0,
+      idModule: 0,
+      idProfesseur: 0,
+      idTypePlanification: 0,
+      description: '',
+      idUser: 0,
+      idsClasses: []
+    }));
+    dispatch(setEditingPlanification(null));
     dispatch(closeModal());
   };
 

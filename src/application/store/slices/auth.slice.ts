@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { AuthState, LoginRequest, ChangePasswordRequest } from '../../../shared/types/auth.types';
 import { AuthService } from '../../services/auth.service';
+import { apiClient } from '../../../infrastructure/api/api.client';
 
 const authService = new AuthService();
 
@@ -49,6 +50,16 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       state.error = null;
     },
+    logoutWithRedirect: (state) => {
+      authService.logout();
+      state.user = null;
+      state.token = null;
+      state.refreshToken = null;
+      state.isAuthenticated = false;
+      state.error = null;
+      // Use the API client logout method which handles redirect
+      apiClient.logout();
+    },
     clearError: (state) => {
       state.error = null;
     },
@@ -89,5 +100,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, clearError } = authSlice.actions;
+export const { logout, logoutWithRedirect, clearError } = authSlice.actions;
 export default authSlice.reducer;

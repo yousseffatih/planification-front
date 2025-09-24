@@ -10,6 +10,7 @@ import { Roles } from './presentation/pages/Roles';
 import { Professors } from './presentation/pages/Professors';
 import { Modules } from './presentation/pages/Modules';
 import { Salles } from './presentation/pages/Salles';
+import { Attributes } from './presentation/pages/Attribute';
 import { ProtectedRoute } from './presentation/components/common/ProtectedRoute';
 import { DashboardLayout } from './presentation/components/layout/DashboardLayout';
 import { Planifications } from './presentation/pages/Planification';
@@ -102,6 +103,16 @@ function App() {
                 <ProtectedRoute>
                   <DashboardLayout>
                     <Salles />
+                  </DashboardLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/attributs"
+              element={
+                <ProtectedRoute>
+                  <DashboardLayout>
+                    <Attributes />
                   </DashboardLayout>
                 </ProtectedRoute>
               }

@@ -1,5 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import logo from '../../../assets/logo.jpeg';
 import {
   HomeIcon,
   UsersIcon,
@@ -9,6 +10,7 @@ import {
   BookOpenIcon,
   BuildingOfficeIcon,
   CalendarIcon,
+  TagIcon,
   ArrowRightOnRectangleIcon
 } from '@heroicons/react/24/outline';
 
@@ -26,16 +28,25 @@ export const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
     { name: 'Professeurs', href: '/professors', icon: UserGroupIcon },
     { name: 'Modules', href: '/modules', icon: BookOpenIcon },
     { name: 'Salles', href: '/salles', icon: BuildingOfficeIcon },
+    { name: 'Attributs', href: '/attributs', icon: TagIcon }
   ];
 
   return (
     <div className="w-64 bg-white h-screen fixed left-0 top-0 border-r border-gray-200 flex flex-col">
       <div className="p-6">
-        <div className="flex items-center gap-3">
-          <div className="bg-blue-600 rounded-lg w-10 h-10 flex items-center justify-center">
-            <span className="text-white font-bold text-lg">I</span>
+        <div className="flex items-center gap-4">
+          <div className="relative">
+            <img 
+              src={logo} 
+              alt="OrgaCours Logo" 
+              className="w-14 h-14 rounded-xl object-cover object-center scale-110 shadow-sm border-2 border-gray-100"
+            />
+            <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-blue-500/10 to-purple-500/10"></div>
           </div>
-          <span className="text-xl font-bold text-gray-900">Invo.</span>
+          <div className="flex flex-col">
+            <span className="text-xl font-bold text-gray-900">OrgaCours</span>
+            <span className="text-xs text-gray-500 font-medium">Planning System</span>
+          </div>
         </div>
       </div>
 

@@ -11,12 +11,13 @@ export interface Planification {
   libelleUser: string;
   nom: string;
   idProfesseur: number;
-  idTypePlanification: string;
+  idTypePlanification: number;
   datePlanification: string;
   libelleProfeseur: string;
   libelleModule: string;
   libelleSalle: string;
   liblleTypePlanification: string;
+  idsClasses: number[];
 }
 
 
@@ -51,4 +52,12 @@ export interface FilterRequest {
   dateFin: string;
   idClasse: number | null;
   idProf: number | null;
+}
+
+export interface TotalPagesInfo {
+  totalReservation: number;
+  reservationAnnuler: number;
+  salleDesiponible: number;
+  salleIndesponible: number;
+  utilisateurActif: number;
 }

@@ -8,16 +8,13 @@ import { PlanificationService } from "../../services/planification.service";
 import { SalleService } from "../../services/salle.service";
 
 // Interfaces
-interface PaginatedResponse<T> {
-  content: T[];
-  totlaPages: number;
-  totalElement: number;
-}
 
 interface PlanificationState {
   planifications: Planification[];
+  currentPlanification: Planification | null; // Add this for single planification
   loading: boolean;
   tableLoading: boolean;
+  planificationLoading: boolean; // Add this for single planification loading
   error: string | null;
   
   // Pagination
@@ -70,7 +67,7 @@ const initialFormData = {
   idTypePlanification: 0,
   datePlanification: '',
   idUser: 1,
-  idsClasses: []
+  idsClasses: [] as number[]
 };
 
 const initialFilters: FilterRequest = {
@@ -85,8 +82,10 @@ const initialFilters: FilterRequest = {
 
 const initialState: PlanificationState = {
   planifications: [],
+  currentPlanification: null, // Add this
   loading: false,
   tableLoading: false,
+  planificationLoading: false, // Add this
   error: null,
   
   // Pagination
@@ -132,6 +131,30 @@ export const fetchPlanifications = createAsyncThunk(
   }
 );
 
+// Add this new async thunk for getting planification by ID
+export const fetchPlanificationById = createAsyncThunk(
+  'planifications/fetchPlanificationById',
+  async (id: number, { rejectWithValue }) => {
+    try {
+      const response = await planificationService.getPlanificationById(id);
+      return response;
+    } catch (error) {
+      const err = error as { response?: { data?: { message?: string; error?: string }; status?: number }; message?: string };
+      
+      // Handle different types of errors
+      if (err?.response?.status === 401) {
+        return rejectWithValue('Session expirée. Veuillez vous reconnecter.');
+      }
+      
+      const errorMessage = err?.response?.data?.message ||
+                           err?.response?.data?.error ||
+                           err?.message ||
+                           'Erreur lors du chargement de la planification';
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
 export const fetchDropdownOptions = createAsyncThunk(
   'planifications/fetchDropdownOptions',
   async () => {
@@ -158,11 +181,17 @@ export const createPlanification = createAsyncThunk(
   async (data: CreatePlanificationRequest, { rejectWithValue }) => {
     try {
       await planificationService.createPlanification(data);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      // Handle different types of errors
+      const err = error as { response?: { data?: { message?: string; error?: string }; status?: number }; message?: string };
+      if (err?.response?.status === 401) {
+        return rejectWithValue('Session expirée. Veuillez vous reconnecter.');
+      }
+      
       // Handle API error response
-      const errorMessage = error?.response?.data?.message || 
-                          error?.response?.data?.error || 
-                          error?.message || 
+      const errorMessage = err?.response?.data?.message || 
+                          err?.response?.data?.error || 
+                          err?.message || 
                           'Erreur lors de la création de la planification';
       return rejectWithValue(errorMessage);
     }
@@ -171,14 +200,20 @@ export const createPlanification = createAsyncThunk(
 
 export const updatePlanification = createAsyncThunk(
   'planifications/updatePlanification',
-  async ({ id, data }: { id: number; data: any }, { rejectWithValue }) => {
+  async ({ id, data }: { id: number; data: Partial<CreatePlanificationRequest> }, { rejectWithValue }) => {
     try {
       await planificationService.updatePlanification(id, data);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      // Handle different types of errors
+      const err = error as { response?: { data?: { message?: string; error?: string }; status?: number }; message?: string };
+      if (err?.response?.status === 401) {
+        return rejectWithValue('Session expirée. Veuillez vous reconnecter.');
+      }
+      
       // Handle API error response
-      const errorMessage = error?.response?.data?.message || 
-                          error?.response?.data?.error || 
-                          error?.message || 
+      const errorMessage = err?.response?.data?.message || 
+                          err?.response?.data?.error || 
+                          err?.message || 
                           'Erreur lors de la modification de la planification';
       return rejectWithValue(errorMessage);
     }
@@ -190,11 +225,17 @@ export const deletePlanification = createAsyncThunk(
   async (id: number, { rejectWithValue }) => {
     try {
       await planificationService.deletePlanification(id);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      // Handle different types of errors
+      const err = error as { response?: { data?: { message?: string; error?: string }; status?: number }; message?: string };
+      if (err?.response?.status === 401) {
+        return rejectWithValue('Session expirée. Veuillez vous reconnecter.');
+      }
+      
       // Handle API error response
-      const errorMessage = error?.response?.data?.message || 
-                          error?.response?.data?.error || 
-                          error?.message || 
+      const errorMessage = err?.response?.data?.message || 
+                          err?.response?.data?.error || 
+                          err?.message || 
                           'Erreur lors de la suppression de la planification';
       return rejectWithValue(errorMessage);
     }
@@ -233,21 +274,26 @@ const planificationSlice = createSlice({
     resetFormData: (state) => {
       state.formData = initialFormData;
     },
-    setEditingPlanification: (state, action: PayloadAction<Planification>) => {
+    setEditingPlanification: (state, action: PayloadAction<Planification | null>) => {
       state.editingPlanification = action.payload;
       state.formData = {
-        nom: action.payload.nom,
-        description: action.payload.description || '',
-        timeDebut: action.payload.timeDebut,
-        timeFin: action.payload.timeFin,
-        idSalle: action.payload.idSalle,
-        idModule: action.payload.idModule,
-        idProfesseur: action.payload.idProfesseur,
-        idTypePlanification: parseInt(action.payload.idTypePlanification),
-        datePlanification: action.payload.datePlanification,
-        idUser: action.payload.idUser,
-        idsClasses: [] // You might need to fetch this from the planification object
+        nom: action.payload?.nom || '' ,
+        description: action.payload?.description || '',
+        timeDebut: action.payload?.timeDebut || '',
+        timeFin: action.payload?.timeFin || '',
+        idSalle: action.payload?.idSalle || 0,
+        idModule: action.payload?.idModule || 0,
+        idProfesseur: action.payload?.idProfesseur || 0,
+        idTypePlanification: action.payload?.idTypePlanification || 0,
+        datePlanification: action.payload?.datePlanification || '',
+        idUser: action.payload?.idUser || 0,
+        idsClasses: action.payload?.idsClasses || []
       };
+    },
+    
+    // Add action to clear current planification
+    clearCurrentPlanification: (state) => {
+      state.currentPlanification = null;
     },
     
     // Classes management
@@ -261,7 +307,7 @@ const planificationSlice = createSlice({
     },
     
     // Filter actions
-    setFilter: (state, action: PayloadAction<{ key: keyof FilterRequest; value: any }>) => {
+    setFilter: (state, action: PayloadAction<{ key: keyof FilterRequest; value: string | number | null }>) => {
       state.filters = { ...state.filters, [action.payload.key]: action.payload.value };
       state.currentPage = 0; // Reset to first page when filters change
     },
@@ -304,6 +350,24 @@ const planificationSlice = createSlice({
       .addCase(fetchPlanifications.rejected, (state, action) => {
         state.tableLoading = false;
         state.error = action.error.message || 'Erreur lors du chargement des planifications';
+      });
+
+    // Add cases for fetchPlanificationById
+    builder
+      .addCase(fetchPlanificationById.pending, (state) => {
+        state.planificationLoading = true;
+        state.error = null;
+        state.currentPlanification = null;
+      })
+      .addCase(fetchPlanificationById.fulfilled, (state, action) => {
+        state.planificationLoading = false;
+        state.currentPlanification = action.payload;
+        state.error = null;
+      })
+      .addCase(fetchPlanificationById.rejected, (state, action) => {
+        state.planificationLoading = false;
+        state.currentPlanification = null;
+        state.error = action.payload as string || action.error.message || 'Erreur lors du chargement de la planification';
       });
     
     // Fetch dropdown options
@@ -392,6 +456,7 @@ export const {
   setFormData,
   resetFormData,
   setEditingPlanification,
+  clearCurrentPlanification, // Add this export
   addClass,
   removeClass,
   setFilter,

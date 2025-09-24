@@ -7,6 +7,7 @@ import { Input } from '../components/common/Input';
 import { Select } from '../components/common/Select';
 import { Professor, CreateProfessorRequest, UpdateProfessorRequest } from '../../shared/types/professor.types';
 import { ProfessorService } from '../../application/services/professor.service';
+import { ListAttribute } from '../../shared/types/salle.types';
 
 export const Professors: React.FC = () => {
   const [professors, setProfessors] = useState<Professor[]>([]);
@@ -54,7 +55,7 @@ export const Professors: React.FC = () => {
   try {
     const types = await professorService.getListTypeProf();
     setTypeProfOptions(
-      types.map((t: any) => ({
+      types.map((t: ListAttribute) => ({
         value: t.id,
         label: t.libelle
       }))
@@ -64,11 +65,7 @@ export const Professors: React.FC = () => {
   }
 };
 
-  // Get unique professor types for filter
-  const uniqueTypes = useMemo(() => {
-    const types = [...new Set(professors.map(p => p.libelleTypeProf))];
-    return types.filter(Boolean).sort();
-  }, [professors]);
+
 
   // Filter professors based on search term, status, and type
   const filteredProfessors = useMemo(() => {

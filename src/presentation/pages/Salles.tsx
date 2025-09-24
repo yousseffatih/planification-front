@@ -66,10 +66,10 @@ export const Salles: React.FC = () => {
 };
 
   // Get unique types for filter
-  const uniqueTypes = useMemo(() => {
-    const types = [...new Set(salles.map(s => s.libelleTypeSalle))];
-    return types.filter(Boolean).sort();
-  }, [salles]);
+  // const uniqueTypes = useMemo(() => {
+  //   const types = [...new Set(salles.map(s => s.libelleTypeSalle))];
+  //   return types.filter(Boolean).sort();
+  // }, [salles]);
 
   // Filter salles based on search term, status, type, and capacity
   const filteredSalles = useMemo(() => {

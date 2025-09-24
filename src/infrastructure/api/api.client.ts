@@ -1,5 +1,24 @@
 import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 
+// Event emitter for logout events
+class LogoutEventEmitter {
+  private listeners: (() => void)[] = [];
+
+  addListener(callback: () => void) {
+    this.listeners.push(callback);
+  }
+
+  removeListener(callback: () => void) {
+    this.listeners = this.listeners.filter(listener => listener !== callback);
+  }
+
+  emit() {
+    this.listeners.forEach(listener => listener());
+  }
+}
+
+export const logoutEventEmitter = new LogoutEventEmitter();
+
 class ApiClient {
   private client: AxiosInstance;
 
@@ -35,12 +54,11 @@ class ApiClient {
       (response: AxiosResponse) => {
         return response;
       },
-      (error) => {
+      async (error) => {
         if (error.response?.status === 401) {
-          localStorage.removeItem('token');
-          localStorage.removeItem('refreshToken');
-          localStorage.removeItem('user');
-          window.location.href = '/login';
+          // Don't automatically logout - let the error propagate to the component
+          // The component can handle the 401 error appropriately
+          console.warn('Unauthorized request - token may be expired or invalid');
         }
         return Promise.reject(error);
       }
@@ -61,6 +79,15 @@ class ApiClient {
 
   public async delete<T>(url: string): Promise<AxiosResponse<T>> {
     return this.client.delete<T>(url);
+  }
+
+  // Method to handle logout properly
+  public logout(): void {
+    localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('user');
+    logoutEventEmitter.emit();
+    window.location.href = '/login';
   }
 }
 

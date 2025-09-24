@@ -5,6 +5,7 @@ import { Button } from '../common/Button';
 import { Input } from '../common/Input';
 import { useAppDispatch, useAppSelector } from '../../../application/hooks/redux.hooks';
 import { loginAsync, clearError } from '../../../application/store/slices/auth.slice';
+import logo from '../../../assets/logo.jpeg';
 
 export const LoginForm: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -52,10 +53,20 @@ export const LoginForm: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8">
         <div className="text-center mb-8">
-          <div className="bg-blue-600 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-            <span className="text-white font-bold text-xl">Invo.</span>
+          <div className="flex justify-center items-center gap-4 mb-6">
+            <div className="relative">
+              <img 
+                src={logo} 
+                alt="OrgaCours Logo" 
+                className="w-20 h-20 rounded-xl object-cover object-center scale-110 shadow-sm border-2 border-gray-100"
+              />
+              <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-blue-500/10 to-purple-500/10"></div>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-2xl font-bold text-gray-900">OrgaCours</span>
+              <span className="text-sm text-gray-500 font-medium">Planning System</span>
+            </div>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Welcome Back</h1>
           <p className="text-gray-600 mt-2">Sign in to your account</p>
         </div>
 
