@@ -10,7 +10,7 @@ export const Header: React.FC = () => {
     <header className="bg-white border-b border-gray-200 px-6 py-4 ml-64">
       <div className="flex items-center justify-between">
         <div className="flex-1 max-w-lg">
-          
+
         </div>
 
         <div className="flex items-center gap-4">
@@ -24,11 +24,11 @@ export const Header: React.FC = () => {
               <p className="text-sm font-medium text-gray-900">
                 {user ? `${user.prenom} ${user.nom}` : 'User'}
               </p>
-              <p className="text-xs text-gray-500">{user ? 
-              `${user.role}` : 'USER'}</p>
+              <p className="text-xs text-gray-500">{user ?
+                `${user.role}` : 'USER'}</p>
             </div>
             <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-medium">
-              {user ? user.prenom.charAt(0) : 'U'}
+              {user ? user.prenom.charAt(0).toUpperCase() : 'U'}
             </div>
           </div>
         </div>

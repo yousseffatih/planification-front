@@ -9,6 +9,7 @@ import { User, CreateUserRequest, UpdateUserRequest } from '../../shared/types/u
 import { UserService } from '../../application/services/user.service';
 import { RoleService } from '../../application/services/role.service';
 import { Role } from '../../shared/types/role.types';
+import { AuthService } from '../../application/services/auth.service';
 
 export const Users: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -34,6 +35,7 @@ export const Users: React.FC = () => {
 
   const userService = new UserService();
   const roleService = new RoleService();
+  const authService = new AuthService();
 
   useEffect(() => {
     loadUsers();
@@ -71,11 +73,11 @@ export const Users: React.FC = () => {
   // Filter users based on search term, status, and role
   const filteredUsers = useMemo(() => {
     return users.filter(user => {
-      const matchesSearch = searchTerm === '' || 
-                           user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           user.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           user.prenom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           user.email.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = searchTerm === '' ||
+        user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.prenom.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus = statusFilter === 'all' || user.statut.toLowerCase() === statusFilter;
       //const matchesRole = roleFilter === 'all' || user.role === roleFilter;
       return matchesSearch && matchesStatus;// && matchesRole;
@@ -89,19 +91,18 @@ export const Users: React.FC = () => {
     { key: 'prenom', label: 'Prénom' },
     { key: 'email', label: 'Email' },
     { key: 'libelleRole', label: 'Rôle' },
-    { 
-      key: 'statut', 
+    {
+      key: 'statut',
       label: 'Statut',
       render: (value: string) => (
-        <span className={`px-2 py-1 text-xs rounded-full ${
-          value === 'actif' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-        }`}>
+        <span className={`px-2 py-1 text-xs rounded-full ${value === 'actif' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+          }`}>
           {value == 'actif' ? 'Actif' : 'Inactif'}
         </span>
       )
     },
-    { 
-      key: 'password', 
+    {
+      key: 'password',
       label: 'R.mot de passe',
       render: (_: any, user: User) => (
         <div className="flex items-center justify-center">
@@ -117,8 +118,8 @@ export const Users: React.FC = () => {
         </div>
       )
     },
-    { 
-      key: 'ChangeStatus', 
+    {
+      key: 'ChangeStatus',
       label: 'Changement statut',
       render: (_: any, user: User) => (
         <div className="flex items-center gap-2">
@@ -202,7 +203,8 @@ export const Users: React.FC = () => {
     try {
       setTableLoading(true);
       await userService.desactivateUser(user.id);
-      await loadUsers();
+      authService.logout();
+      //await loadUsers();
     } catch (error) {
       setError('Erreur lors de la désactivation de l\'utilisateur');
       console.error('Error deactivating user:', error);
@@ -218,7 +220,7 @@ export const Users: React.FC = () => {
 
   const confirmDelete = async () => {
     if (!userToDelete) return;
-    
+
     try {
       setTableLoading(true);
       await userService.deleteUser(userToDelete.id);
@@ -265,7 +267,7 @@ export const Users: React.FC = () => {
         };
         await userService.createUser(createData);
       }
-      
+
       await loadUsers();
       setIsModalOpen(false);
     } catch (error) {
@@ -469,7 +471,7 @@ export const Users: React.FC = () => {
               </p>
             </div>
           </div>
-          
+
           <div className="bg-gray-50 rounded-lg p-4">
             <p className="text-sm text-gray-700">
               Êtes-vous sûr de vouloir supprimer l'utilisateur{' '}
@@ -547,7 +549,7 @@ export const Users: React.FC = () => {
               readOnly={!!editingUser}
               disabled={!!editingUser}
             />
-        
+
             <Select
               label="Rôle"
               name="roleId"
